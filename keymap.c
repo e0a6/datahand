@@ -13,7 +13,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_LSFT,  KC_SCLN, KC_Q,    KC_J,    KC_K,   KC_X,
                   KC_GRV,  KC_INS, KC_LEFT, KC_RIGHT,
         // left thumb
-                            LGUI_T(KC_ESC), KC_LCTL,
+                                            KC_NO, KC_LCTL,
                                      KC_PGUP,
                           RCTL_T(KC_BSPC), KC_DEL, KC_PGDN,
         // right hand
