@@ -15,7 +15,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         // left thumb
                             LGUI_T(KC_ESC), KC_LCTL,
                                      KC_PGUP,
-                   KC_BSPC, KC_DEL,  KC_PGDN,
+                          RCTL_T(KC_BSPC), KC_DEL, KC_PGDN,
         // right hand
         KC_F9,  KC_F10,   KC_F11,   KC_F12,   KC_PSCR, KC_SLCK, KC_PAUS, KC_FN0, KC_1,
         KC_6,   KC_7,     KC_8,     KC_9,     KC_0,    KC_MINS,
@@ -24,9 +24,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         KC_B,   KC_M,     KC_W,     KC_V,     KC_Z,    KC_RSFT,
                           KC_UP,  KC_DOWN, KC_LBRC, KC_RBRC,
         // right thumb
-        KC_RGUI,    KC_RCTL,
+        KC_RGUI, RGUI_T(KC_ESC),
         KC_RALT,
-        KC_NO, KC_ENT, KC_SPC
+        KC_END, KC_ENT, RALT_T(KC_SPC)
     ),
 
 [_CUSTOM] = LAYOUT(
@@ -51,7 +51,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
        // right thumb
        KC_NO, KC_NO,
        KC_NO,
-       KC_TRNS, KC_ENT, KC_NO
+       KC_END, KC_ENT, RSFT_T(KC_SPC)
 )
 };
 
@@ -85,4 +85,22 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
 void led_set_user(uint8_t usb_led) {
 
+}
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        //case RSFT_T(KC_SPC):
+        //    return TAPPING_TERM + 50;
+        case LGUI_T(KC_ESC):
+            //return TAPPING_TERM + 25;
+            return TAPPING_TERM + 10000;
+        case RSFT_T(KC_H):
+            return TAPPING_TERM + 7500;
+        case LSFT_T(KC_U):
+            return TAPPING_TERM + 7500;
+        case RCTL_T(KC_SPC):
+            return TAPPING_TERM + 10;
+        default:
+            return TAPPING_TERM;
+    }
 }
