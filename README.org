@@ -1,0 +1,173 @@
+#+TITLE: datahand — Dvorak QMK keymap for Kinesis Advantage (kinT / Teensy 3.6)
+#+OPTIONS: toc:2 num:nil
+
+A custom QMK keymap for a Kinesis Advantage running the [[https://github.com/kinx-project/kint][kinT replacement
+controller]] with a Teensy 3.6. Layout is Dvorak with mod-tap thumb keys
+and a held-modifier helper layer.
+
+QMK build target: =kinesis/kint36=.
+
+* Layout summary
+
+- =_DVORAK= (base): Dvorak with mod-tap modifiers on most thumb keys.
+  Top-left key is =QK_BOOT= — tap it to reboot the Teensy into HalfKay
+  bootloader without opening the case.
+- =_MODS= (held): activated by holding the left thumb's top-palm-outer
+  key. While held, the =U= position becomes a Ctrl+Alt held modifier;
+  every other key is transparent.
+- =_CUSTOM=: media / mouse / number remappings. Defined but unreachable
+  — its activation key is deliberately =KC_NO=.
+
+* Hardware
+
+| Component       | Detail                                          |
+|-----------------+-------------------------------------------------|
+| Keyboard        | Kinesis Advantage / Advantage 2 (KB500 / KB600) |
+| Controller      | kinT (replacement)                              |
+| Microcontroller | Teensy 3.6 (=MK66FX1M0=, 180 MHz ARM Cortex-M4F)  |
+| Bootloader      | HalfKay                                         |
+| USB VID:PID     | =1209:345c= running / =16c0:0478= bootloader        |
+
+To confirm your Teensy model, plug in the keyboard and run:
+
+#+begin_src bash
+lsusb -v -d 1209:345c 2>/dev/null | grep -iE "iProduct|idProduct"
+#+end_src
+
+Expect =iProduct = "kinT (kint36)"=. If you have a Teensy 4.1 or
+Teensy++ 2.0 the build target differs (=kinesis/kint41= or
+=kinesis/kint2pp=) and this keymap may need adjustments.
+
+* Prerequisites
+
+System packages (Ubuntu / Debian):
+
+#+begin_src bash
+sudo apt install -y \
+    gcc-arm-none-eabi \
+    binutils-arm-none-eabi \
+    libnewlib-arm-none-eabi \
+    teensy-loader-cli \
+    pipx
+#+end_src
+
+QMK CLI via =pipx= (cleaner than =pip install --break-system-packages=
+on PEP 668 systems):
+
+#+begin_src bash
+pipx ensurepath           # appends ~/.local/bin to PATH — open a fresh shell after
+pipx install qmk
+which qmk                 # should print /home/$USER/.local/bin/qmk
+#+end_src
+
+* Setup
+
+Clone QMK firmware and this repo. Paths below assume =~/git/=; adjust to
+taste.
+
+#+begin_src bash
+mkdir -p ~/git && cd ~/git
+git clone https://github.com/qmk/qmk_firmware.git
+git clone <this-repo-url> datahand
+#+end_src
+
+Initialize QMK's submodules. This pulls ChibiOS, LUFA, NXP MCUXpresso
+SDK, etc. — expect a few minutes and around 2 GB of disk:
+
+#+begin_src bash
+cd ~/git/qmk_firmware
+git submodule update --init --recursive
+#+end_src
+
+Drop this keymap into QMK's tree:
+
+#+begin_src bash
+mkdir -p ~/git/qmk_firmware/keyboards/kinesis/kint36/keymaps/mine
+cp ~/git/datahand/{config.h,keymap.c,rules.mk} \
+   ~/git/qmk_firmware/keyboards/kinesis/kint36/keymaps/mine/
+#+end_src
+
+* Build
+
+#+begin_src bash
+cd ~/git/qmk_firmware
+qmk compile -kb kinesis/kint36 -km mine
+#+end_src
+
+On success the firmware lands at
+=~/git/qmk_firmware/kinesis_kint36_mine.hex= (~27 KB, 2.6% of Teensy
+3.6 flash).
+
+* Flash
+
+** Enter HalfKay bootloader
+
+Either:
+
+1. *Tap the =QK_BOOT= key* (top-left of the left keywell on this
+   keymap). The Teensy reboots into HalfKay.
+2. *Press the physical button on the Teensy itself.* Requires opening
+   the case. Use this if the running firmware is broken and the
+   =QK_BOOT= key isn't where you expect.
+
+Confirm with =lsusb=:
+
+#+begin_src bash
+lsusb | grep 16c0
+# expected: ID 16c0:0478 Van Ooijen Technische Informatica Teensy Halfkay Bootloader
+#+end_src
+
+** Run the flasher
+
+#+begin_src bash
+teensy_loader_cli --mcu=mk66fx1m0 -v \
+    ~/git/qmk_firmware/kinesis_kint36_mine.hex
+#+end_src
+
+The Teensy auto-reboots into the new firmware; =lsusb= shows
+=1209:345c= again.
+
+* Recovery
+
+If a flash leaves the keyboard unusable, the [[https://github.com/kinx-project/kint][kinT project]] ships a known-
+good default firmware:
+
+#+begin_src bash
+git clone https://github.com/kinx-project/kint.git ~/git/kint
+# press the physical Teensy button to enter HalfKay
+teensy_loader_cli --mcu=mk66fx1m0 -v \
+    ~/git/kint/default-firmware/kinesis_kint36_default.hex
+#+end_src
+
+* Iterating
+
+Edit =keymap.c= in this repo, then re-sync, build, and flash:
+
+#+begin_src bash
+cp ~/git/datahand/keymap.c \
+   ~/git/qmk_firmware/keyboards/kinesis/kint36/keymaps/mine/
+cd ~/git/qmk_firmware
+qmk compile -kb kinesis/kint36 -km mine
+# enter HalfKay (top-left key or Teensy button), then:
+teensy_loader_cli --mcu=mk66fx1m0 -v kinesis_kint36_mine.hex
+#+end_src
+
+* Gotchas
+
+- *QMK 0.32+ requires the =qmk= Python CLI even when building via
+  =make=.* Without it the build dies with =qmk: not found= during a
+  pre-build step.
+- *PEP 668* on modern Debian/Ubuntu blocks =pip install qmk= unless you
+  pass =--break-system-packages=. =pipx= avoids that.
+- *Submodule init can fail silently if disk fills mid-clone* — the NXP
+  =mcux-sdk= alone is large. If a later build complains about a missing
+  file inside a submodule (e.g. =lib/printf/src/printf/printf.c=), the
+  submodule was partially populated. Fix:
+  #+begin_src bash
+  git submodule deinit -f <path>
+  git submodule update --init <path>
+  #+end_src
+- *Pre-2021 QMK syntax does not compile.* Old keymaps using =RESET=,
+  =KC_SLCK=, =KC_POWER=, =KC_MS_U/L/R=, =action_get_macro=,
+  =led_set_user(uint8_t)= etc. need porting. See the commit history of
+  this repo for the diff.
