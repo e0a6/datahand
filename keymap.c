@@ -2,6 +2,7 @@
 
 #define _DVORAK 0 // Base Dvorak layer
 #define _CUSTOM 1 // My Custom layer (currently disabled — no activation key)
+#define _MODS   2 // Modifier-helper layer (held via left-thumb-top-outer key)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -22,9 +23,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
              KC_GRV,  KC_INS,  KC_LEFT, KC_RIGHT,                                                       KC_UP,   KC_DOWN, KC_LBRC, KC_RBRC,
 
     // ─── thumb clusters (left ┊ right; rows: top palm / middle / bottom) ──────
-                                                KC_NO,           KC_LCTL,         KC_RGUI,           RGUI_T(KC_ESC),
+                                                MO(_MODS),       KC_LCTL,         KC_RGUI,           RGUI_T(KC_ESC),
                                                                  KC_PGUP,         KC_RALT,
-                                RCTL_T(KC_BSPC), KC_DEL,         KC_PGDN,         KC_END,            HYPR_T(KC_ENT),  RALT_T(KC_SPC)
+                                LCTL_T(KC_BSPC), KC_DEL,         KC_PGDN,         KC_END,            HYPR_T(KC_ENT),  RALT_T(KC_SPC)
 ),
 
 
@@ -48,6 +49,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                                 KC_NO,           KC_NO,           KC_NO,             KC_NO,
                                                                  KC_NO,           KC_NO,
                                 KC_NO,           KC_NO,          KC_TRNS,         KC_END,            KC_ENT,          RSFT_T(KC_SPC)
+),
+
+
+// ┌─────────────────────────────────────────────────────────────────────────────┐
+// │  _MODS — held via left-thumb-top-outer; U position becomes Ctrl+Alt mod     │
+// └─────────────────────────────────────────────────────────────────────────────┘
+[_MODS] = LAYOUT(
+    // ─── function row ─────────────────────────────────────────────────────────
+    KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,           KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+
+    // ─── main keywell (U position → LCA(KC_NO) = hold Ctrl+Alt) ───────────────
+    KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS, KC_TRNS,    KC_TRNS,                                KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+    KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS, KC_TRNS,    KC_TRNS,                                KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+    KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS, LCA(KC_NO), KC_TRNS,                                KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+    KC_TRNS, KC_TRNS,    KC_TRNS, KC_TRNS, KC_TRNS,    KC_TRNS,                                KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+
+    // ─── arrow row ────────────────────────────────────────────────────────────
+             KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,                                                        KC_TRNS, KC_TRNS, KC_TRNS, KC_TRNS,
+
+    // ─── thumb clusters (left ┊ right; rows: top palm / middle / bottom) ──────
+                                                KC_TRNS,         KC_TRNS,         KC_TRNS,           KC_TRNS,
+                                                                 KC_TRNS,         KC_TRNS,
+                                KC_TRNS,         KC_TRNS,        KC_TRNS,         KC_TRNS,           KC_TRNS,         KC_TRNS
 )
 
 };
